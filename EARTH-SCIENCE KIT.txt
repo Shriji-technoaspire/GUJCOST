@@ -1,0 +1,144 @@
+// THIS CODE IS FOR EARTH SCIENCE KIT (TOPIC:- VEDANT/ESP32) 
+
+
+
+
+//bmp ldr
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <Adafruit_BMP085.h>
+const int potPin = 34;
+// Update these with values suitable for your network.
+long ldr_read;
+float temp1;
+float pre1;
+float alt;
+const char* ssid = "shriji";
+const char* password = "shriji9892";
+const char* mqtt_server = "broker.mqtt-dashboard.com";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+unsigned long lastMsg = 0;
+#define MSG_BUFFER_SIZE	(100)
+char msg[MSG_BUFFER_SIZE];
+int value = 0;
+
+Adafruit_BMP085 bmp;
+void setup_wifi() {
+
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  randomSeed(micros());
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  // Switch on the LED if an 1 was received as first character
+  if ((char)payload[0] == '1') {
+    //digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    // but actually the LED is on; this is because
+    // it is active low on the ESP-01)
+  } else {
+    //digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+  }
+
+}
+
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (client.connect(clientId.c_str())) {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      client.publish("Vedant/esp32", "hello world");
+      // ... and resubscribe
+      client.subscribe("esp32/Vedant");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
+void setup()
+{
+  //  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  Serial.begin(115200);
+  pinMode(potPin,INPUT);
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+  if (!bmp.begin())
+  {
+    Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    while (1)
+    {}
+  }
+}
+
+void loop() {
+
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+  ldr_read = analogRead(potPin);
+  Serial.println(ldr_read);
+  unsigned long now = millis();
+  if (now - lastMsg > 5000)
+  {
+    lastMsg = now;
+    ++value;
+    snprintf (msg, MSG_BUFFER_SIZE, "Alt %.2fM\nPres %.2fPa\nTemp %.2f°c%\nLdr %4ld\n", alt, pre1, temp1,ldr_read);
+    Serial.print("Publish message: ");
+    Serial.println(msg);    client.publish("Vedant/esp32", msg);
+  }
+//  Serial.print("Temperature = ");
+//  Serial.print(temp1);
+//  Serial.println(" *C");
+//  Serial.print("Pressure = ");
+//  Serial.print( pre1 );
+//  Serial.println(" Pa");
+//  Serial.print("Altitude = ");
+//  Serial.print(alt);
+//  Serial.println(" meters");
+  temp1 = bmp.readTemperature();
+  pre1 = bmp.readPressure();
+  alt = bmp.readAltitude();
+  alt = 44+alt;
+  Serial.println();
+  delay(500);
+}
