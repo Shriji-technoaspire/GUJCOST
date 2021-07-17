@@ -1,0 +1,20 @@
+// THIS CODE IS FOR "Automatic night Door" (PROJECT ELECTRONICS MANUAL)
+
+
+
+int val;
+int brillo;
+void setup() {
+pinMode(9, OUTPUT);
+Serial.begin(9600);
+}
+void loop() {
+val = analogRead(A5);
+Serial.print("Lectura entrada analógica = ");
+Serial.print(val);
+Serial.print('\t');
+brillo = map(val, 0, 1023, 0, 255);
+Serial.print("Valor del brillo del LED = ");
+Serial.println(brillo);
+analogWrite(9, brillo);
+}

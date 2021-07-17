@@ -1,0 +1,83 @@
+// THIS CODE IS FOR "Blink LED with POT" (PROJECT ELECTRONICS MANUAL)
+
+
+
+#define pot A1
+#define kirmizi 2
+#define yesil 3
+#define sari 4
+#define turuncu 5
+#define mavi 6
+#define gri 7
+
+int potOku;
+
+void setup()
+{
+   pinMode(kirmizi, OUTPUT);
+   pinMode(yesil, OUTPUT);
+   pinMode(mavi, OUTPUT);
+   pinMode(gri, OUTPUT);
+   pinMode(turuncu, OUTPUT);
+   pinMode(sari, OUTPUT);
+}
+
+void loop()
+{
+    potOku = analogRead(pot);
+   //&& -> shift+6
+  if(potOku<170){
+    
+    digitalWrite(kirmizi, 1);
+    digitalWrite(yesil, 0);
+    digitalWrite(mavi, 0);
+    digitalWrite(sari, 0);
+    digitalWrite(turuncu, 0);
+    digitalWrite(gri, 0);       
+  } 
+  if(potOku>170 && potOku<340){
+    digitalWrite(yesil, 1);
+    digitalWrite(kirmizi, 0);
+    digitalWrite(mavi, 0);
+    digitalWrite(gri, 0);
+    digitalWrite(sari, 0);
+    digitalWrite(turuncu, 0);  
+  }
+  if(potOku>340 && potOku<510){
+    digitalWrite(yesil, 0);
+    digitalWrite(kirmizi, 0);
+    digitalWrite(mavi, 0);
+    digitalWrite(gri, 0);
+    digitalWrite(sari, 1);
+    digitalWrite(turuncu, 0); 
+  
+  }
+   if(potOku>510 && potOku<680){
+    digitalWrite(yesil, 0);
+    digitalWrite(kirmizi, 0);
+    digitalWrite(mavi, 0);
+    digitalWrite(gri, 0);
+    digitalWrite(sari, 0);
+    digitalWrite(turuncu, 1); 
+  
+  }
+   if(potOku>680 && potOku<850){
+    digitalWrite(yesil, 0);
+    digitalWrite(kirmizi, 0);
+    digitalWrite(mavi, 1);
+    digitalWrite(gri, 0);
+    digitalWrite(sari, 0);
+    digitalWrite(turuncu, 0); 
+  
+  }
+   if(potOku>850){
+    digitalWrite(yesil, 0);
+    digitalWrite(kirmizi, 0);
+    digitalWrite(mavi, 0);
+    digitalWrite(gri, 1);
+    digitalWrite(sari, 0);
+    digitalWrite(turuncu, 0); 
+  
+  }
+
+}
